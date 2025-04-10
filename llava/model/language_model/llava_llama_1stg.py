@@ -268,11 +268,18 @@ class LlamaModel(LlamaPreTrainedModel):
             # the manual implementation that requires a 4D causal mask in all cases.
             _2d_attention_mask_b = attention_mask
 
+            # attention_mask = _prepare_4d_causal_attention_mask_for_sdpa(
+            #     attention_mask,
+            #     (batch_size, seq_length),
+            #     inputs_embeds,
+            #     past_key_values_length,
+            # )
+
             attention_mask = _prepare_4d_causal_attention_mask_for_sdpa(
                 attention_mask,
-                (batch_size, seq_length),
-                inputs_embeds,
-                past_key_values_length,
+                (batch_size, seq_length + past_key_values_length),   # Changed from (batch_size, seq_length) to ensure generating the whole mask
+                inputs_embeds,  # Only uses .dtype and isinstance, so passing this has no impact
+                0,  # Changed from past_key_values_length
             )
 
             mask_type = attention_mask.dtype
@@ -302,6 +309,7 @@ class LlamaModel(LlamaPreTrainedModel):
                 attention_mask, (batch_size, seq_length), inputs_embeds, past_key_values_length
             )
 
+        attention_mask = attention_mask[:,:,-seq_length:,:]
         # embed positions
         hidden_states = inputs_embeds
 
@@ -439,7 +447,7 @@ class LlavaLlamaForCausalLM(LlamaPreTrainedModel, LlavaMetaForCausalLM):
                 labels,
                 images,
                 image_sizes,
-                voco_loc_back # 4.4
+                voco_loc_back # here voco_loc_back+=1 if input_ids is [B,1] (autogenerate phase)
             )
 
         output_attentions = output_attentions if output_attentions is not None else self.config.output_attentions

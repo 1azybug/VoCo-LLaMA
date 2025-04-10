@@ -7,14 +7,14 @@ IFS=',' read -ra GPULIST <<< "$gpu_list"
 CHUNKS=${#GPULIST[@]}
 echo "CHUNKS: $CHUNKS"
 
-CKPT="voco_llama"
+CKPT="voco_llava"
 SPLIT="llava_vqav2_mscoco_test-dev2015"
 
 for IDX in $(seq 0 $((CHUNKS-1))); do
     CUDA_VISIBLE_DEVICES=${GPULIST[$IDX]} python -m llava.eval.model_vqa_loader \
-        --model-path voco_llama_ckpt \
+        --model-path ./checkpoints/voco_llava_ckpt \
         --question-file ./playground/data/eval/vqav2/$SPLIT.jsonl \
-        --image-folder /group/40033/public_datasets/coco/test2015 \
+        --image-folder ./playground/data/eval/vqav2/test2015 \
         --answers-file ./playground/data/eval/vqav2/answers/$SPLIT/$CKPT/${CHUNKS}_${IDX}.jsonl \
         --voco_num 2 \
         --num-chunks $CHUNKS \
@@ -36,3 +36,5 @@ for IDX in $(seq 0 $((CHUNKS-1))); do
 done
 
 python scripts/convert_vqav2_for_submission.py --split $SPLIT --ckpt $CKPT
+
+# CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 bash scripts/eval/vqav2.sh

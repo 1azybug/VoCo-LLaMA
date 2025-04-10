@@ -3,7 +3,7 @@
 SPLIT="mmbench_dev_20230712"
 
 CUDA_VISIBLE_DEVICES=0 python -m llava.eval.model_vqa_mmbench \
-    --model-path voco_llama_ckpt \
+    --model-path ./checkpoints/voco_llava_ckpt \
     --question-file ./playground/data/eval/mmbench/$SPLIT.tsv \
     --answers-file ./playground/data/eval/mmbench/answers/$SPLIT/voco_llama.jsonl \
     --voco_num 2 \
@@ -19,3 +19,4 @@ python scripts/convert_mmbench_for_submission.py \
     --upload-dir ./playground/data/eval/mmbench/answers_upload/$SPLIT \
     --experiment voco_llama
 
+# CUDA_VISIBLE_DEVICES=0 bash scripts/eval/mmbench.sh
