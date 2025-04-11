@@ -13,7 +13,7 @@
 2. Install Package
 
 ```Shell
-cd /mnt/zhaorunsong/repo_test/VoCo-LLaMA
+cd VoCo-LLaMA
 conda create -n voco python=3.10 -y
 conda activate voco
 pip install --upgrade pip  # enable PEP 660 support
