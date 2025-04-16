@@ -445,6 +445,14 @@ def preprocess_v1(
         # conversations = [f"<image>\n{maybe_voco_str}\n" + conversations[0].replace("<image>\n", '')]
         conversations = [f"<image>\n{maybe_voco_str}\n" + conversations[0].replace("<image>", '').replace("\n", '')]
         input_ids = torch.stack([tokenizer_image_token(prompt, tokenizer, return_tensors='pt') for prompt in conversations], dim=0)
+        # print("============================================================")
+        # print(f"input_ids:{input_ids}")
+        # # input_ids:tensor([[    1,  -200, 29871,    13, 32000, 32000,    13,...]
+        # print(f"13:{tokenizer.convert_ids_to_tokens(13)}")
+        # print(f"29871:{tokenizer.convert_ids_to_tokens(29871)}")
+        # # 13:<0x0A>
+        # # 29871:▁
+        # print("============================================================")
     else:
         input_ids = tokenizer(
             conversations,

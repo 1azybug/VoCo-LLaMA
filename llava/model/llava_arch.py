@@ -324,6 +324,7 @@ class LlavaMetaForCausalLM(ABC):
         else:
             attention_mask = attention_mask.to(dtype=_attention_mask.dtype)
 
+        # 这一步似乎让padding的position_ids处理白费了
         if _position_ids is None:
             position_ids = None
 

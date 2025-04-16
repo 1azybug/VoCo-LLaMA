@@ -145,6 +145,9 @@ class LlamaDecoderLayer(nn.Module):
 
         hidden_states = self.input_layernorm(hidden_states)
 
+        # torch.set_printoptions(profile="full")
+        # print(f"use position_ids:",position_ids)
+
         # Self Attention
         hidden_states, self_attn_weights, present_key_value = self.self_attn(
             hidden_states=hidden_states,
@@ -204,6 +207,14 @@ class LlamaModel(LlamaPreTrainedModel):
 
     def set_input_embeddings(self, value):
         self.embed_tokens = value
+
+    def get_uniform_position_ids(self, x_1, x_n, voco_num=2):
+        # [S]
+        tot = x_n-x_1+1
+        ratio = tot/voco_num
+        return torch.round(
+            torch.arange((x_1 + (ratio - 1) / 2), x_n, step=ratio, device=self.device)
+            )
 
     def forward(
         self,
@@ -291,6 +302,80 @@ class LlamaModel(LlamaPreTrainedModel):
             for idx, locs in enumerate(voco_loc_back):
                 for loc in locs:
                     _2d_attention_mask[idx][seq_length - 1 - loc] = 32000
+
+            ################################Apply UPL here!################################################
+            # print("***************************************************************")
+            # print(f"inputs_embeds.shape:{inputs_embeds.shape}")
+            # print(f"position_ids.shape:{position_ids.shape}")
+            position_ids = position_ids.repeat(batch_size, 1)
+            # print(f"repeated_position_ids.shape:{position_ids.shape}")
+            # inputs_embeds.shape:torch.Size([2, 1278, 4096])
+            # position_ids.shape:torch.Size([1, 1278])
+            # repeated_position_ids.shape:torch.Size([2, 1278])
+            if inputs_embeds.size(1)==1:
+                voco_num = len(voco_loc_back[0])
+                # print(f"voco_num:{voco_num}")
+                # print(f"before position_ids:{position_ids}")
+                position_ids -= voco_num
+                # print(f"after position_ids:{position_ids}")
+            else:
+                for b in range(attention_mask.size(0)):
+                    img_begin_loc = first_false_indices[b]
+                    img_end_loc = (seq_length - 1 - voco_loc_back[b][0])-1
+                    voco_num = len(voco_loc_back[b])
+                    # print(f"example[{b}]:")
+                    # print(f"{img_begin_loc}~{img_end_loc}")
+                    # print(f"begin_loc:{_2d_attention_mask[b][max(0, img_begin_loc-2):img_begin_loc+3]}")
+                    # print(f"end_loc:{_2d_attention_mask[b][max(0, img_end_loc-2):img_end_loc+3]}")
+                    # print(f"voco_num:{voco_num}")
+                    # {img_begin_loc}~{img_end_loc}一共579个Token
+                    # 图片数量应该是576
+                    # [    1,  -200, 29871,    13, 32000, 32000,    13, ...]
+                    # [  bos,   img,     ▁,<0x0A>,  voco,  voco,    13, ...]
+                    # img_begin_loc -> bos;  img_end_loc -> <0x0A>
+                    # 29871是空格或单词边界
+                    # 13是换行
+
+                    voco_loc = img_end_loc+1
+
+
+                    img_begin_loc += 1
+                    img_end_loc -= 2
+                    
+                    voco_original_pids = position_ids[b][voco_loc:voco_loc+voco_num]
+                    voco_pids = self.get_uniform_position_ids(x_1=img_begin_loc,x_n=img_end_loc,voco_num=voco_num)
+                    # print(f"voco_original_pids:{voco_original_pids}")
+                    # print(f"voco_pids:{voco_pids}")
+                    
+                    # print(f"before position_ids:{position_ids[b]}")
+                    position_ids[b][voco_loc:voco_loc+voco_num] = voco_pids
+                    position_ids[b][voco_loc+voco_num:] -= voco_num
+                    # print(f"after position_ids:{position_ids[b]}")
+
+                    # example[1]:
+                    # 249~827
+                    # begin_loc:tensor([0., 0., 1., 1., 1.], device='cuda:7', dtype=torch.bfloat16)
+                    # end_loc:tensor([1.0000e+00, 1.0000e+00, 1.0000e+00, 3.2000e+04, 3.2000e+04],device='cuda:7', dtype=torch.bfloat16)
+                    # voco_num:2
+                    # voco_original_pids:tensor([828, 829], device='cuda:7')
+                    # voco_pids:tensor([394., 682.], device='cuda:7')
+                    # before position_ids:tensor([  0,   1,   2,   3,   4,   ......, 818, 819, 820, 821, 822, 823, 824, 825,
+                    # 826, 827, 828, 829, 830, 831, 832, 833, 834, 835, 836, ......, 944, 945, 946, 947, 948, 949, 950],
+                    # device='cuda:7')
+                    # after position_ids:tensor([  0,   1,   2,   3,   4,   ......,  818, 819, 820, 821, 822, 823, 824, 825,
+                    # 826, 827, 394, 682, 828, 829, 830, 831, 832, 833, 834, ......, 942, 943, 944, 945, 946, 947, 948],
+                    # device='cuda:7')
+
+
+            # print("---------------------------------------------------------------")
+            # print(f"position_ids:", position_ids)
+            # print(f"voco_loc_back", voco_loc_back)
+            # # torch.set_printoptions(profile="full")
+            # # print(f"_2d_attention_mask",_2d_attention_mask)
+            # # _2d_attention_mask: [[1,....,1,32000,32000,1,...,1],
+            # #                      [0,...0,1,...,1,32000,32000,1,...,1]
+            # #                         ]
+            # print("***************************************************************")
             attention_mask_voco = make_voco_mask_llava(
                 _2d_attention_mask,
                 32000,
