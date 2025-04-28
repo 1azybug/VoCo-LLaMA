@@ -17,9 +17,9 @@ deepspeed --include localhost:0,1,2,3,4,5,6,7 --master_port=25600 llava/train/tr
     --bf16 True \
     --output_dir ./checkpoints/voco_llava_ckpt \
     --num_train_epochs 2 \
-    --per_device_train_batch_size 8 \
+    --per_device_train_batch_size 4 \
     --per_device_eval_batch_size 4 \
-    --gradient_accumulation_steps 2 \
+    --gradient_accumulation_steps 4 \
     --evaluation_strategy "no" \
     --save_strategy "steps" \
     --save_steps 50000 \

@@ -312,14 +312,18 @@ class LlamaModel(LlamaPreTrainedModel):
             # inputs_embeds.shape:torch.Size([2, 1278, 4096])
             # position_ids.shape:torch.Size([1, 1278])
             # repeated_position_ids.shape:torch.Size([2, 1278])
+
+            print(f"voco_loc_back:{voco_loc_back}")
             if inputs_embeds.size(1)==1:
-                voco_num = len(voco_loc_back[0])
-                # print(f"voco_num:{voco_num}")
-                # print(f"before position_ids:{position_ids}")
-                position_ids -= voco_num
-                # print(f"after position_ids:{position_ids}")
+                for b, locs_not_used in enumerate(voco_loc_back):
+
+                    voco_num = len(voco_loc_back[b])
+                    # print(f"voco_num:{voco_num}")
+                    # print(f"before position_ids:{position_ids}")
+                    position_ids[b] -= voco_num
+                    # print(f"after position_ids:{position_ids}")
             else:
-                for b in range(attention_mask.size(0)):
+                for b, locs_not_used in enumerate(voco_loc_back):
                     img_begin_loc = first_false_indices[b]
                     img_end_loc = (seq_length - 1 - voco_loc_back[b][0])-1
                     voco_num = len(voco_loc_back[b])
