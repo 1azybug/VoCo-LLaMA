@@ -17,7 +17,7 @@ for IDX in $(seq 0 $((CHUNKS-1))); do
         --answers-file ./playground/data/eval/seed_bench/answers/$CKPT/${CHUNKS}_${IDX}.jsonl \
         --num-chunks $CHUNKS \
         --chunk-idx $IDX \
-        --voco_num 2 \
+        --voco_num 128 \
         --temperature 0 \
         --conv-mode vicuna_v1 &
 done

@@ -233,7 +233,7 @@ class LlavaMetaForCausalLM(ABC):
             indices = (l == 32000).nonzero(as_tuple=True)[0]
             if indices.size(0) > 0:
                 # token num
-                voco_num = 2
+                voco_num = 128
                 assert indices.size(0) == voco_num
                 indices = l.size(0) - 1 - indices
                 voco_loc_back.append(indices.tolist())

@@ -5,7 +5,7 @@ CUDA_VISIBLE_DEVICES=1 python -m llava.eval.model_vqa_loader \
     --question-file ./playground/data/eval/MME/llava_mme.jsonl \
     --image-folder ./playground/data/eval/MME/MME_Benchmark_release_version \
     --answers-file ./playground/data/eval/MME/answers/voco_llama.jsonl \
-    --voco_num 2 \
+    --voco_num 128 \
     --temperature 0 \
     --conv-mode vicuna_v1
 

@@ -16,7 +16,7 @@ for IDX in $(seq 0 $((CHUNKS-1))); do
         --question-file ./playground/data/eval/vqav2/$SPLIT.jsonl \
         --image-folder ./playground/data/eval/vqav2/test2015 \
         --answers-file ./playground/data/eval/vqav2/answers/$SPLIT/$CKPT/${CHUNKS}_${IDX}.jsonl \
-        --voco_num 2 \
+        --voco_num 128 \
         --num-chunks $CHUNKS \
         --chunk-idx $IDX \
         --temperature 0 \

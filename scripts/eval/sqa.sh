@@ -7,7 +7,7 @@ CUDA_VISIBLE_DEVICES=7 python -m llava.eval.model_vqa_science \
     --answers-file ./playground/data/eval/scienceqa/answers/voco_llama.jsonl \
     --single-pred-prompt \
     --temperature 0 \
-    --voco_num 2 \
+    --voco_num 128 \
     --conv-mode vicuna_v1
 
 python llava/eval/eval_science_qa.py \
