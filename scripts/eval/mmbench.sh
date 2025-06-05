@@ -6,7 +6,7 @@ CUDA_VISIBLE_DEVICES=0 python -m llava.eval.model_vqa_mmbench \
     --model-path ./checkpoints/voco_llava_ckpt \
     --question-file ./playground/data/eval/mmbench/$SPLIT.tsv \
     --answers-file ./playground/data/eval/mmbench/answers/$SPLIT/voco_llama.jsonl \
-    --voco_num 2 \
+    --voco_num 128 \
     --single-pred-prompt \
     --temperature 0 \
     --conv-mode vicuna_v1

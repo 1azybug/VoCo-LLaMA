@@ -440,7 +440,7 @@ def preprocess_v1(
     # token num
     if has_image:
         maybe_voco_str = "".join(
-            ["<voco>" for _ in range(2)]
+            ["<voco>" for _ in range(128)]
         )
         # conversations = [f"<image>\n{maybe_voco_str}\n" + conversations[0].replace("<image>\n", '')]
         conversations = [f"<image>\n{maybe_voco_str}\n" + conversations[0].replace("<image>", '').replace("\n", '')]
