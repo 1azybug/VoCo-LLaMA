@@ -212,8 +212,11 @@ class LlamaModel(LlamaPreTrainedModel):
         # [S]
         tot = x_n-x_1+1
         ratio = tot/voco_num
+        # return torch.round(
+        #     torch.arange((x_1 + (ratio - 1) / 2), x_n, step=ratio, device=self.device)
+        #     )
         return torch.round(
-            torch.arange((x_1 + (ratio - 1) / 2), x_n, step=ratio, device=self.device)
+            torch.linspace(x_1 + (ratio - 1) / 2, x_n - (ratio - 1) / 2, steps=voco_num, device=self.device)
             )
 
     def forward(
